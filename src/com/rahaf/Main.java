@@ -18,7 +18,7 @@ class RequestHandler implements Callable<Void>{
     }
     @Override
     public Void call() throws Exception {
-        System.out.println("connect");
+        System.out.println("connect");//test
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintStream writer = new PrintStream(socket.getOutputStream());
         String line;
