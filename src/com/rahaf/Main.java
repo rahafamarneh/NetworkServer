@@ -1,11 +1,13 @@
 package com.rahaf;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.SecureRandom;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,34 +24,41 @@ class RequestHandler implements Callable<Void>{
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintStream writer = new PrintStream(socket.getOutputStream());
         String line;
-        while ( (line=reader.readLine()) != null && !line.equals("stop")){
-            System.out.println("receive from client " + line);
+        while ( (line=reader.readLine()) != null){
+            System.out.println("receive from client: " + line);
 
-            if(line.startsWith("fact")){
-                System.out.println("fact");
-                int number = Integer.parseInt(line.split(" ")[1]);
-                writer.println("fact of " + number);
+            JSONObject jsonObject = new JSONObject(line);
+
+            String funName = jsonObject.getString("fun");
+            System.out.println(funName);
+
+            if(funName.equalsIgnoreCase("add")){
+                System.out.println("fun name="+funName);
+                double n1 = jsonObject.getDouble("n1");
+                double n2 = jsonObject.getDouble("n2");
+
+                String result = new Server().add(n1,n2) + "";
+
+                JSONObject jsonObjectResult = new JSONObject();
+                jsonObjectResult.put("status","success");
+                jsonObjectResult.put("result",result);
+
+                writer.println(jsonObjectResult.toString());
             }
-
-//            else if(line.equals("add")){
-//                double n1 = Integer.parseInt(reader.readLine());
-//                double n2 = Integer.parseInt(reader.readLine());
-//                writer.println("add of "+n1 + " " + n2);
-//            }
-
-            writer.flush();
 
 
         }
+
+        socket.close();
 
         return null;
     }
 }
 public class Main {
-    static ServerSocket serverSocket;
+
     public static void main(String[] args) throws Exception{
-	    serverSocket = new ServerSocket(3000);
-        System.out.println("start");
+        ServerSocket serverSocket = new ServerSocket(3000);
+        System.out.println("server start");
         ExecutorService service = Executors.newFixedThreadPool(10);
         while (true){
             Socket socket =  serverSocket.accept();
