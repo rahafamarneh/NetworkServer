@@ -1,13 +1,16 @@
 package com.rahaf;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.SecureRandom;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,15 +58,41 @@ class RequestHandler implements Callable<Void>{
     }
 }
 public class Main {
-
+   public static final int PORT = 3000;
     public static void main(String[] args) throws Exception{
-        ServerSocket serverSocket = new ServerSocket(3000);
+        ServerSocket serverSocket = new ServerSocket(PORT);
         System.out.println("server start");
         ExecutorService service = Executors.newFixedThreadPool(10);
+        registerToBinder();
+
         while (true){
             Socket socket =  serverSocket.accept();
             service.submit(new RequestHandler(socket));
         }
 
+    }
+
+    private static void registerToBinder() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try (Socket socket = new Socket("localhost",4000)){
+
+                    PrintStream printStream = new PrintStream(socket.getOutputStream());
+
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("op","register");
+                    List<String> functions = Arrays.asList("add","mul");
+                    jsonObject.put("functions",functions);
+                    jsonObject.put("serverIp",InetAddress.getLocalHost().getHostAddress());
+                    jsonObject.put("serverPort",PORT);
+
+                    printStream.println(jsonObject.toString());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }, 1000, 10000);
     }
 }
