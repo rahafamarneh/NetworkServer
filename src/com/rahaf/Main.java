@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 
 class RequestHandler implements Callable<Void>{
     private Socket socket;
-    RequestHandler(Socket socket){
+     RequestHandler(Socket socket){
         this.socket = socket;
     }
     @Override
@@ -66,7 +66,7 @@ public class Main {
         registerToBinder();
 
         while (true){
-            Socket socket =  serverSocket.accept();
+            Socket socket =  serverSocket.accept(); //from clients
             service.submit(new RequestHandler(socket));
         }
 
@@ -85,7 +85,7 @@ public class Main {
                     jsonObject.put("op","register");
                     List<String> functions = Arrays.asList("add","mul");
                     jsonObject.put("functions",functions);
-                    jsonObject.put("serverIp",InetAddress.getLocalHost().getHostAddress());
+                    jsonObject.put("serverIp",InetAddress.getLocalHost().getHostAddress());//ip
                     jsonObject.put("serverPort",PORT);
 
                     printStream.println(jsonObject.toString());
