@@ -34,20 +34,28 @@ class RequestHandler implements Callable<Void>{
 
             String funName = jsonObject.getString("fun");
             System.out.println(funName);
-
-            if(funName.equalsIgnoreCase("add")){
-                System.out.println("fun name="+funName);
+            String result="";
+            if(funName.equalsIgnoreCase("add")) {
+                System.out.println("fun name=" + funName);
                 double n1 = jsonObject.getDouble("n1");
                 double n2 = jsonObject.getDouble("n2");
 
-                String result = new Server().add(n1,n2) + "";
-
-                JSONObject jsonObjectResult = new JSONObject();
-                jsonObjectResult.put("status","success");
-                jsonObjectResult.put("result",result);
-
-                writer.println(jsonObjectResult.toString());
+                 result = new Server().add(n1, n2) + "";
             }
+            else if(funName.equalsIgnoreCase("fact")){
+                System.out.println("fun name="+funName);
+                int n1=jsonObject.getInt("n1");
+                 result= new Server().fact(n1)+"";
+
+
+            }
+            JSONObject jsonObjectResult = new JSONObject();
+            jsonObjectResult.put("status","success");
+            jsonObjectResult.put("result",result);
+
+            writer.println(jsonObjectResult.toString());
+
+
 
 
         }
@@ -83,7 +91,7 @@ public class Main {
 
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("op","register");
-                    List<String> functions = Arrays.asList("add","mul");
+                    List<String> functions = Arrays.asList("add","fact");
                     jsonObject.put("functions",functions);
                     jsonObject.put("serverIp",InetAddress.getLocalHost().getHostAddress());//ip
                     jsonObject.put("serverPort",PORT);
@@ -93,6 +101,6 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-        }, 1000, 10000);
+        }, 1000, 60000);
     }
 }
